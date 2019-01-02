@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
+import java.math.BigDecimal;
 import java.util.Scanner;
 
 /**
@@ -290,11 +291,14 @@ public class SudokuGUI extends JPanel implements ActionListener {
     private void solve() {
 
         try {
+            long start = System.nanoTime();
             int[][] sudoku = getSudokuFromSquares();
             int[][] solution = SudokuSolver.solveFromGrid(sudoku);
             if (solution != null) {
                 update(solution);
-                JOptionPane.showMessageDialog(this, "Solution found.");
+                long differ = System.nanoTime() - start;
+                double seconds = differ / 1000000000d;
+                JOptionPane.showMessageDialog(this, "Solution found in " + BigDecimal.valueOf(seconds).setScale(2, BigDecimal.ROUND_HALF_UP).toPlainString() + " seconds.");
             } else {
                 JDialog dialog = new JOptionPane("Given Sudoku Puzzle has NO Solution. Can't find it if it doesn't exist.", JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION).createDialog("Error");
                 dialog.setAlwaysOnTop(true);
