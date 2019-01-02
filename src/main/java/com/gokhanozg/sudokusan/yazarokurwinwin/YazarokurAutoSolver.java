@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class YazarokurAutoSolver {
 
     private static final Object lock = new Object();
-    private static final int SOLVER_THREADS = 2;
+    private static final int SOLVER_THREADS = 1;
 
     public static void main(String[] args) {
         try {
@@ -64,7 +64,9 @@ public class YazarokurAutoSolver {
 
     private static void solvePuzzle(HttpClient client, AtomicInteger puzzleId) throws URISyntaxException, HttpException, IOException, InterruptedException {
         int puzzleIdInteger = puzzleId.getAndIncrement();
-        HttpGet httpGet = new HttpGet("https://sudoku.yazarokur.com/?sudoku=" + puzzleIdInteger);
+        String url = "https://sudoku.yazarokur.com/?sudoku=" + puzzleIdInteger;
+        System.out.println("Fetching puzzle from:" + url);
+        HttpGet httpGet = new HttpGet(url);
 //        HttpGet httpGet = new HttpGet("https://sudoku.yazarokur.com/?sudoku=" + puzzleId.getAndIncrement());
         String puzzleHtml = null;
         HttpResponse httpResponse = null;
