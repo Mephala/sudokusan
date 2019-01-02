@@ -22,8 +22,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class YazarokurAutoSolver {
 
     private static final Object lock = new Object();
-    private static final int SOLVER_THREADS = 30;
+    private static final int SOLVER_THREADS = 70;
     private static final int PUZZLE_ID_LIMIT = 1000000;
+    private static final AtomicInteger runningThreads = new AtomicInteger(SOLVER_THREADS);
+    private static final AtomicInteger waitingThreads = new AtomicInteger(0);
 
     public static void main(String[] args) {
         try {
@@ -78,8 +80,12 @@ public class YazarokurAutoSolver {
                 int[][][] postSolution = constructPostSolution(solution);
                 HttpPost post = new HttpPost("https://sudoku.yazarokur.com/");
                 setPostParams(post, puzzleHtml, postSolution);
-                System.out.println("Thread waiting for puzzle id:" + puzzleIdInteger);
-                Thread.sleep(65000L);
+                runningThreads.decrementAndGet();
+                waitingThreads.incrementAndGet();
+                System.out.println("Thread waiting for puzzle id:" + puzzleIdInteger + ", runningThreads:" + runningThreads.get() + " , waitingThreads:" + waitingThreads.get());
+                Thread.sleep(145000L);
+                runningThreads.incrementAndGet();
+                waitingThreads.decrementAndGet();
                 String postResponse = null;
                 synchronized (lock) {
                     httpResponse = client.execute(post);
