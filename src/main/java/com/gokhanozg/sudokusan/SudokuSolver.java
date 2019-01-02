@@ -1,5 +1,6 @@
 package com.gokhanozg.sudokusan;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -14,10 +15,11 @@ public class SudokuSolver {
     public static void main(String[] args) {
 
         try {
-            String sudokuString = "-,-,6,-,2,-,8,-,-,-,-,-,9,-,4,-,-,-,3,-,-,-,5,-,-,-,4,-,6,-,-,-,-,-,9,-,7,-,3,-,2,-,1,-,6,-,1,-,-,-,-,-,2,-,3,-,-,-,5,-,-,-,7,-,-,-,3,-,2,-,-,-,-,-,7,-,6,-,9,-,-";
+            long start = System.nanoTime();
+            String sudokuString = "-,-,-,-,-,-,-,-,1,-,-,-,-,-,3,-,2,-,-,-,-,-,8,5,-,-,-,-,-,-,-,-,4,-,9,-,5,-,7,-,-,-,-,-,-,-,-,-,1,-,-,-,-,-,5,-,-,-,-,2,-,-,-,-,-,-,-,1,-,-,4,-,-,7,3,-,-,-,-,-,9";
             String[] parse = sudokuString.split(",");
             if (parse.length != 81) {
-                throw new IllegalArgumentException("Wrong string, please check");
+                throw new IllegalArgumentException("Wrong string, please check (size:" + parse.length + ")");
             }
             int index = 0;
             Integer[] initVals = new Integer[81];
@@ -53,6 +55,9 @@ public class SudokuSolver {
 //            LSudoku lSudoku8 = new LSudoku(6, null, null, null, null, 1, null, null, null);
 //            LSudoku lSudoku9 = new LSudoku(null, null, null, 3, null, 6, 9, 8, 4);
             solveSudoku(lSudoku1, lSudoku2, lSudoku3, lSudoku4, lSudoku5, lSudoku6, lSudoku7, lSudoku8, lSudoku9);
+            long differ = System.nanoTime() - start;
+            double seconds = differ / 1000000000d;
+            System.out.println("Solved puzzle in " + BigDecimal.valueOf(seconds).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + " seconds.");
         } catch (Throwable t) {
             t.printStackTrace();
         }
