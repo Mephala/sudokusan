@@ -1,7 +1,6 @@
 package com.gokhanozg.sudokusan.yazarokurwinwin;
 
 import com.gokhanozg.sudokusan.SudokuSolver;
-import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -18,12 +17,16 @@ import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by Gokhan Ozgozen on 02-Jan-19.
  */
 public class YazarokurAutoSolver {
+
+    private static final Object lock = new Object();
 
     public static void main(String[] args) {
         try {
@@ -45,28 +48,52 @@ public class YazarokurAutoSolver {
     }
 
     private static void startSolving(HttpClient client) throws URISyntaxException, IOException, HttpException, InterruptedException {
-        AtomicInteger puzzleId = new AtomicInteger(605778);
+        AtomicInteger puzzleId = new AtomicInteger(223456);
+        ExecutorService executorService = Executors.newFixedThreadPool(16);
+        while (puzzleId.get() < 1000000) {
+            executorService.submit(() -> {
+                try {
+                    solvePuzzle(client, puzzleId);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            });
+        }
+    }
+
+    private static void solvePuzzle(HttpClient client, AtomicInteger puzzleId) throws URISyntaxException, HttpException, IOException, InterruptedException {
         HttpGet httpGet = new HttpGet("https://sudoku.yazarokur.com/?sudoku=" + puzzleId.getAndIncrement());
-        HttpResponse getResponse = client.execute(httpGet);
-        Header[] headers = getResponse.getAllHeaders();
-        String puzzleHtml = EntityUtils.toString(getResponse.getEntity());
-        if (puzzleHtml.contains("iripenis")) {
-            System.out.println("makaharrak");
+//        HttpGet httpGet = new HttpGet("https://sudoku.yazarokur.com/?sudoku=" + puzzleId.getAndIncrement());
+        String puzzleHtml = null;
+        HttpResponse httpResponse = null;
+        synchronized (lock) {
+            httpResponse = client.execute(httpGet);
+            puzzleHtml = EntityUtils.toString(httpResponse.getEntity());
+            httpResponse.getEntity().consumeContent();
         }
         Integer[] puzzle = parsePuzzle(puzzleHtml);
         int[][] solution = SudokuSolver.solveFrom1DIntegerArray(puzzle);
         int[][][] postSolution = constructPostSolution(solution);
         HttpPost post = new HttpPost("https://sudoku.yazarokur.com/");
         setPostParams(post, puzzleHtml, postSolution);
-        post.setHeaders(headers);
-        String postResponse = EntityUtils.toString(client.execute(post).getEntity());
-        System.out.println(postResponse);
-
+        System.out.println("Thread waiting for puzzle id:" + puzzleId.get());
+        Thread.sleep(65000L);
+        String postResponse = null;
+        synchronized (lock) {
+            httpResponse = client.execute(post);
+            postResponse = EntityUtils.toString(httpResponse.getEntity());
+            httpResponse.getEntity().consumeContent();
+        }
+        if (postResponse.contains("Tebrik Ederim.") && postResponse.contains("Başarını Paylaş Herkes Duysun")) {
+            System.out.println("Solved:" + puzzleId.get());
+        } else {
+            System.out.println("Something went wrong with this:" + puzzleId);
+        }
     }
 
     private static void setPostParams(HttpPost post, String puzzleHtml, int[][][] postSolution) throws UnsupportedEncodingException {
-        String sudoku = parseValWithName("<input type=\"hidden\" name=\"sudoku\" value=\"", puzzleHtml);
-        String sessionId = parseValWithName("<input type=\"hidden\" name=\"sessionId\" value=\"", puzzleHtml);
+        String sudoku = parseValWithName("<input type=hidden name=sudoku value=\"", puzzleHtml);
+        String sessionId = parseValWithName("<input type=hidden name=sessionId value=\"", puzzleHtml);
         List<NameValuePair> params = new ArrayList<>();
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 3; j++) {
