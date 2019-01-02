@@ -37,7 +37,7 @@ public class SudokuSolver {
         }
     }
 
-    private static int[][] solveFrom1DIntegerArray(Integer[] initVals) throws InterruptedException {
+    public static int[][] solveFrom1DIntegerArray(Integer[] initVals) throws InterruptedException {
         int index = 0;
         LSudoku lSudoku1 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
         LSudoku lSudoku2 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
