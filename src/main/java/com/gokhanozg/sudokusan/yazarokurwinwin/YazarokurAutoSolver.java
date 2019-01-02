@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class YazarokurAutoSolver {
 
     private static final Object lock = new Object();
+    private static final int SOLVER_THREADS = 2;
 
     public static void main(String[] args) {
         try {
@@ -49,7 +50,7 @@ public class YazarokurAutoSolver {
 
     private static void startSolving(HttpClient client) throws URISyntaxException, IOException, HttpException, InterruptedException {
         AtomicInteger puzzleId = new AtomicInteger(223456);
-        ExecutorService executorService = Executors.newFixedThreadPool(16);
+        ExecutorService executorService = Executors.newFixedThreadPool(SOLVER_THREADS);
         while (puzzleId.get() < 1000000) {
             executorService.submit(() -> {
                 try {
@@ -62,7 +63,8 @@ public class YazarokurAutoSolver {
     }
 
     private static void solvePuzzle(HttpClient client, AtomicInteger puzzleId) throws URISyntaxException, HttpException, IOException, InterruptedException {
-        HttpGet httpGet = new HttpGet("https://sudoku.yazarokur.com/?sudoku=" + puzzleId.getAndIncrement());
+        int puzzleIdInteger = puzzleId.getAndIncrement();
+        HttpGet httpGet = new HttpGet("https://sudoku.yazarokur.com/?sudoku=" + puzzleIdInteger);
 //        HttpGet httpGet = new HttpGet("https://sudoku.yazarokur.com/?sudoku=" + puzzleId.getAndIncrement());
         String puzzleHtml = null;
         HttpResponse httpResponse = null;
@@ -76,7 +78,7 @@ public class YazarokurAutoSolver {
         int[][][] postSolution = constructPostSolution(solution);
         HttpPost post = new HttpPost("https://sudoku.yazarokur.com/");
         setPostParams(post, puzzleHtml, postSolution);
-        System.out.println("Thread waiting for puzzle id:" + puzzleId.get());
+        System.out.println("Thread waiting for puzzle id:" + puzzleIdInteger);
         Thread.sleep(65000L);
         String postResponse = null;
         synchronized (lock) {
@@ -85,9 +87,9 @@ public class YazarokurAutoSolver {
             httpResponse.getEntity().consumeContent();
         }
         if (postResponse.contains("Tebrik Ederim.") && postResponse.contains("Başarını Paylaş Herkes Duysun")) {
-            System.out.println("Solved:" + puzzleId.get());
+            System.out.println("Solved:" + puzzleIdInteger);
         } else {
-            System.out.println("Something went wrong with this:" + puzzleId);
+            System.out.println("Something went wrong with this:" + puzzleIdInteger);
         }
     }
 
