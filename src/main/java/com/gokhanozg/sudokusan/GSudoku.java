@@ -10,6 +10,7 @@ public class GSudoku {
     private LSudoku[][] lSudokus = new LSudoku[3][3];
     private Integer[][] vals = new Integer[9][9];
 
+
     public GSudoku(LSudoku l1, LSudoku l2, LSudoku l3, LSudoku l4, LSudoku l5, LSudoku l6, LSudoku l7, LSudoku l8, LSudoku l9) {
         lSudokus[0][0] = l1;
         lSudokus[0][1] = l2;
@@ -30,6 +31,10 @@ public class GSudoku {
             }
         }
         setVals();
+    }
+
+    public Integer[][] getVals() {
+        return vals;
     }
 
     private void setVals() {

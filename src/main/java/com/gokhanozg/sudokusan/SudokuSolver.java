@@ -8,38 +8,75 @@ import java.util.*;
 public class SudokuSolver {
 
     private static final int BRUTE_FORCE_LIMIT = 100000;
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_RESET = "\u001B[0m";
 
     public static void main(String[] args) {
 
         try {
-            LSudoku lSudoku1 = new LSudoku(6, 5, 3, 8, null, 7, null, null, null);
-            LSudoku lSudoku2 = new LSudoku(4, null, null, 2, null, null, null, null, 5);
-            LSudoku lSudoku3 = new LSudoku(7, null, null, null, null, null, 4, null, null);
-            LSudoku lSudoku4 = new LSudoku(1, null, 4, 7, null, null, null, null, null);
-            LSudoku lSudoku5 = new LSudoku(null, null, 6, null, 2, null, 3, null, null);
-            LSudoku lSudoku6 = new LSudoku(null, null, null, null, null, 5, 1, null, 9);
-            LSudoku lSudoku7 = new LSudoku(null, null, 2, null, null, null, null, null, 1);
-            LSudoku lSudoku8 = new LSudoku(6, null, null, null, null, 1, null, null, null);
-            LSudoku lSudoku9 = new LSudoku(null, null, null, 3, null, 6, 9, 8, 4);
-            GSudoku gSudoku = new GSudoku(lSudoku1, lSudoku2, lSudoku3, lSudoku4, lSudoku5, lSudoku6, lSudoku7, lSudoku8, lSudoku9);
-
-            Map<Integer, PossibleLSudokuSolutions> positionalSudokuSolutions = new HashMap<>();
-            List<LSudoku> lSudokuList = new ArrayList<>();
-            lSudokuList.add(lSudoku1);
-            lSudokuList.add(lSudoku2);
-            lSudokuList.add(lSudoku3);
-            lSudokuList.add(lSudoku4);
-            lSudokuList.add(lSudoku5);
-            lSudokuList.add(lSudoku6);
-            lSudokuList.add(lSudoku7);
-            lSudokuList.add(lSudoku8);
-            lSudokuList.add(lSudoku9);
-
-            computePossibleSolutions(gSudoku, positionalSudokuSolutions, lSudokuList);
-            solveWithInitialPossibilities(positionalSudokuSolutions, lSudokuList);
+            String sudokuString = "-,-,6,-,2,-,8,-,-,-,-,-,9,-,4,-,-,-,3,-,-,-,5,-,-,-,4,-,6,-,-,-,-,-,9,-,7,-,3,-,2,-,1,-,6,-,1,-,-,-,-,-,2,-,3,-,-,-,5,-,-,-,7,-,-,-,3,-,2,-,-,-,-,-,7,-,6,-,9,-,-";
+            String[] parse = sudokuString.split(",");
+            if (parse.length != 81) {
+                throw new IllegalArgumentException("Wrong string, please check");
+            }
+            int index = 0;
+            Integer[] initVals = new Integer[81];
+            for (int i = 0; i < 81; i++) {
+                String s = parse[i];
+                initVals[i] = s.equals("-") ? null : Integer.parseInt(s);
+            }
+            LSudoku lSudoku1 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+            LSudoku lSudoku2 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+            LSudoku lSudoku3 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+            LSudoku lSudoku4 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+            LSudoku lSudoku5 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+            LSudoku lSudoku6 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+            LSudoku lSudoku7 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+            LSudoku lSudoku8 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+            LSudoku lSudoku9 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+//            LSudoku lSudoku1 = new LSudoku(null, null, null, 3, null, null, null, null, 9);
+//            LSudoku lSudoku2 = new LSudoku(null, 4, null, null, null, 5, null, null, 1);
+//            LSudoku lSudoku3 = new LSudoku(null, null, 5, null, 7, null, 6, 3, null);
+//            LSudoku lSudoku4 = new LSudoku(null, null, 2, 4, null, null, null, null, 3);
+//            LSudoku lSudoku5 = new LSudoku(null, 5, null, null, 6, null, null, 1, null);
+//            LSudoku lSudoku6 = new LSudoku(7, null, null, null, null, 1, 5, null, null);
+//            LSudoku lSudoku7 = new LSudoku(null, 6, 4, null, 9, null, 2, null, null);
+//            LSudoku lSudoku8 = new LSudoku(5, null, null, 2, null, null, null, 9, null);
+//            LSudoku lSudoku9 = new LSudoku(2, null, null, null, null, 4, null, null, null);
+//            LSudoku lSudoku1 = new LSudoku(6, 5, 3, 8, null, 7, null, null, null);
+//            LSudoku lSudoku2 = new LSudoku(4, null, null, 2, null, null, null, null, 5);
+//            LSudoku lSudoku3 = new LSudoku(7, null, null, null, null, null, 4, null, null);
+//            LSudoku lSudoku4 = new LSudoku(1, null, 4, 7, null, null, null, null, null);
+//            LSudoku lSudoku5 = new LSudoku(null, null, 6, null, 2, null, 3, null, null);
+//            LSudoku lSudoku6 = new LSudoku(null, null, null, null, null, 5, 1, null, 9);
+//            LSudoku lSudoku7 = new LSudoku(null, null, 2, null, null, null, null, null, 1);
+//            LSudoku lSudoku8 = new LSudoku(6, null, null, null, null, 1, null, null, null);
+//            LSudoku lSudoku9 = new LSudoku(null, null, null, 3, null, 6, 9, 8, 4);
+            solveSudoku(lSudoku1, lSudoku2, lSudoku3, lSudoku4, lSudoku5, lSudoku6, lSudoku7, lSudoku8, lSudoku9);
         } catch (Throwable t) {
             t.printStackTrace();
         }
+    }
+
+    private static void solveSudoku(LSudoku lSudoku1, LSudoku lSudoku2, LSudoku lSudoku3, LSudoku lSudoku4, LSudoku lSudoku5, LSudoku lSudoku6, LSudoku lSudoku7, LSudoku lSudoku8, LSudoku lSudoku9) throws InterruptedException {
+        GSudoku gSudoku = new GSudoku(lSudoku1, lSudoku2, lSudoku3, lSudoku4, lSudoku5, lSudoku6, lSudoku7, lSudoku8, lSudoku9);
+        System.out.println("***** SOLVING THIS SUDOKU *****");
+        gSudoku.print();
+
+        Map<Integer, PossibleLSudokuSolutions> positionalSudokuSolutions = new HashMap<>();
+        List<LSudoku> lSudokuList = new ArrayList<>();
+        lSudokuList.add(lSudoku1);
+        lSudokuList.add(lSudoku2);
+        lSudokuList.add(lSudoku3);
+        lSudokuList.add(lSudoku4);
+        lSudokuList.add(lSudoku5);
+        lSudokuList.add(lSudoku6);
+        lSudokuList.add(lSudoku7);
+        lSudokuList.add(lSudoku8);
+        lSudokuList.add(lSudoku9);
+
+        computePossibleSolutions(gSudoku, positionalSudokuSolutions, lSudokuList);
+        solveWithInitialPossibilities(positionalSudokuSolutions, lSudokuList, gSudoku);
     }
 
     private static void computePossibleSolutions(GSudoku gSudoku, Map<Integer, PossibleLSudokuSolutions> positionalSudokuSolutions, List<LSudoku> lSudokuList) throws InterruptedException {
@@ -65,7 +102,7 @@ public class SudokuSolver {
         }
     }
 
-    private static void solveWithInitialPossibilities(Map<Integer, PossibleLSudokuSolutions> positionalSudokuSolutions, List<LSudoku> baseSudokuList) throws InterruptedException {
+    private static void solveWithInitialPossibilities(Map<Integer, PossibleLSudokuSolutions> positionalSudokuSolutions, List<LSudoku> baseSudokuList, GSudoku gSudoku) throws InterruptedException {
         Map<Integer, LSudoku> compatibleSolutions = new HashMap<>();
         Stack<LSudoku> lSudokuStack = new Stack<>();
         Map<Integer, Integer> solutionIndex = new HashMap<>();
@@ -106,7 +143,26 @@ public class SudokuSolver {
         }
         GSudoku finalSolution = new GSudoku(solutionLSudokus.get(8), solutionLSudokus.get(7), solutionLSudokus.get(6), solutionLSudokus.get(5), solutionLSudokus.get(4), solutionLSudokus.get(3), solutionLSudokus.get(2), solutionLSudokus.get(1), solutionLSudokus.get(0));
         System.out.println("****** FINAL SOLUTION ******");
-        finalSolution.print();
+        fancyPrint(finalSolution, gSudoku);
+    }
+
+    private static void fancyPrint(GSudoku finalSolution, GSudoku gSudoku) {
+        Integer[][] solution = finalSolution.getVals();
+        Integer[][] given = gSudoku.getVals();
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                if (given[i][j] != null) {
+                    System.out.print(given[i][j]);
+                } else {
+                    System.out.print(ANSI_RED + solution[i][j] + ANSI_RESET);
+                }
+                if (j == 8) {
+                    System.out.println();
+                } else {
+                    System.out.print(" ");
+                }
+            }
+        }
     }
 
 
