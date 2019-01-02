@@ -64,7 +64,12 @@ public class SudokuSolver {
         }
     }
 
-    private static void solveSudoku(LSudoku lSudoku1, LSudoku lSudoku2, LSudoku lSudoku3, LSudoku lSudoku4, LSudoku lSudoku5, LSudoku lSudoku6, LSudoku lSudoku7, LSudoku lSudoku8, LSudoku lSudoku9) throws InterruptedException {
+    public static int[][] solveFromGrid(int[][] given) {
+        return null;
+
+    }
+
+    private static int[][] solveSudoku(LSudoku lSudoku1, LSudoku lSudoku2, LSudoku lSudoku3, LSudoku lSudoku4, LSudoku lSudoku5, LSudoku lSudoku6, LSudoku lSudoku7, LSudoku lSudoku8, LSudoku lSudoku9) throws InterruptedException {
         GSudoku gSudoku = new GSudoku(lSudoku1, lSudoku2, lSudoku3, lSudoku4, lSudoku5, lSudoku6, lSudoku7, lSudoku8, lSudoku9);
         System.out.println("***** SOLVING THIS SUDOKU *****");
         gSudoku.print();
@@ -82,7 +87,7 @@ public class SudokuSolver {
         lSudokuList.add(lSudoku9);
 
         computePossibleSolutions(gSudoku, positionalSudokuSolutions, lSudokuList);
-        solveWithInitialPossibilities(positionalSudokuSolutions, lSudokuList, gSudoku);
+        return solveWithInitialPossibilities(positionalSudokuSolutions, lSudokuList, gSudoku);
     }
 
     private static void computePossibleSolutions(GSudoku gSudoku, Map<Integer, PossibleLSudokuSolutions> positionalSudokuSolutions, List<LSudoku> lSudokuList) throws InterruptedException {
@@ -108,7 +113,7 @@ public class SudokuSolver {
         }
     }
 
-    private static void solveWithInitialPossibilities(Map<Integer, PossibleLSudokuSolutions> positionalSudokuSolutions, List<LSudoku> baseSudokuList, GSudoku gSudoku) throws InterruptedException {
+    private static int[][] solveWithInitialPossibilities(Map<Integer, PossibleLSudokuSolutions> positionalSudokuSolutions, List<LSudoku> baseSudokuList, GSudoku gSudoku) throws InterruptedException {
         Map<Integer, LSudoku> compatibleSolutions = new HashMap<>();
         Stack<LSudoku> lSudokuStack = new Stack<>();
         Map<Integer, Integer> solutionIndex = new HashMap<>();
@@ -150,6 +155,15 @@ public class SudokuSolver {
         GSudoku finalSolution = new GSudoku(solutionLSudokus.get(8), solutionLSudokus.get(7), solutionLSudokus.get(6), solutionLSudokus.get(5), solutionLSudokus.get(4), solutionLSudokus.get(3), solutionLSudokus.get(2), solutionLSudokus.get(1), solutionLSudokus.get(0));
         System.out.println("****** FINAL SOLUTION ******");
         fancyPrint(finalSolution, gSudoku);
+        Integer[][] finalSol = finalSolution.getVals();
+        int[][] retval = new int[9][9];
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                retval[i][j] = finalSol[i][j];
+            }
+
+        }
+        return retval;
     }
 
     private static void fancyPrint(GSudoku finalSolution, GSudoku gSudoku) {
