@@ -1,7 +1,6 @@
 package com.gokhanozg.sudokusan.yazarokurwinwin;
 
 import com.gokhanozg.sudokusan.SudokuSolver;
-import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -12,13 +11,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -27,7 +22,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class YazarokurAutoSolver {
 
     private static final Object lock = new Object();
-    private static final int SOLVER_THREADS = 1;
+    private static final int SOLVER_THREADS = 30;
+    private static final int PUZZLE_ID_LIMIT = 1000000;
 
     public static void main(String[] args) {
         try {
@@ -48,51 +44,60 @@ public class YazarokurAutoSolver {
         }
     }
 
-    private static void startSolving(HttpClient client) throws URISyntaxException, IOException, HttpException, InterruptedException {
+    private static void startSolving(HttpClient client) throws InterruptedException {
         AtomicInteger puzzleId = new AtomicInteger(223456);
-        ExecutorService executorService = Executors.newFixedThreadPool(SOLVER_THREADS);
-        while (puzzleId.get() < 1000000) {
-            executorService.submit(() -> {
-                try {
-                    solvePuzzle(client, puzzleId);
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
-            });
+        List<Thread> solverThreads = new ArrayList<>();
+        for (int i = 0; i < SOLVER_THREADS; i++) {
+            Thread t = new Thread(() -> solvePuzzle(client, puzzleId));
+            t.start();
+            solverThreads.add(t);
         }
+        for (Thread solverThread : solverThreads) {
+            solverThread.join();
+        }
+        System.out.println("!!FINITO!!");
     }
 
-    private static void solvePuzzle(HttpClient client, AtomicInteger puzzleId) throws URISyntaxException, HttpException, IOException, InterruptedException {
+    private static void solvePuzzle(HttpClient client, AtomicInteger puzzleId) {
         int puzzleIdInteger = puzzleId.getAndIncrement();
-        String url = "https://sudoku.yazarokur.com/?sudoku=" + puzzleIdInteger;
-        System.out.println("Fetching puzzle from:" + url);
-        HttpGet httpGet = new HttpGet(url);
+        while (puzzleIdInteger < PUZZLE_ID_LIMIT) {
+            try {
+                String url = "https://sudoku.yazarokur.com/?sudoku=" + puzzleIdInteger;
+                System.out.println("Fetching puzzle from:" + url);
+                HttpGet httpGet = new HttpGet(url);
 //        HttpGet httpGet = new HttpGet("https://sudoku.yazarokur.com/?sudoku=" + puzzleId.getAndIncrement());
-        String puzzleHtml = null;
-        HttpResponse httpResponse = null;
-        synchronized (lock) {
-            httpResponse = client.execute(httpGet);
-            puzzleHtml = EntityUtils.toString(httpResponse.getEntity());
-            httpResponse.getEntity().consumeContent();
+                String puzzleHtml = null;
+                HttpResponse httpResponse = null;
+                synchronized (lock) {
+                    httpResponse = client.execute(httpGet);
+                    puzzleHtml = EntityUtils.toString(httpResponse.getEntity());
+                    httpResponse.getEntity().consumeContent();
+                }
+                Integer[] puzzle = parsePuzzle(puzzleHtml);
+                int[][] solution = SudokuSolver.solveFrom1DIntegerArray(puzzle);
+                int[][][] postSolution = constructPostSolution(solution);
+                HttpPost post = new HttpPost("https://sudoku.yazarokur.com/");
+                setPostParams(post, puzzleHtml, postSolution);
+                System.out.println("Thread waiting for puzzle id:" + puzzleIdInteger);
+                Thread.sleep(65000L);
+                String postResponse = null;
+                synchronized (lock) {
+                    httpResponse = client.execute(post);
+                    postResponse = EntityUtils.toString(httpResponse.getEntity());
+                    httpResponse.getEntity().consumeContent();
+                }
+                if (postResponse.contains("Tebrik Ederim.") && postResponse.contains("Başarını Paylaş Herkes Duysun")) {
+                    System.out.println("Solved:" + puzzleIdInteger);
+                } else {
+                    System.out.println("Something went wrong with this:" + puzzleIdInteger);
+                }
+                puzzleIdInteger = puzzleId.getAndIncrement();
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+
         }
-        Integer[] puzzle = parsePuzzle(puzzleHtml);
-        int[][] solution = SudokuSolver.solveFrom1DIntegerArray(puzzle);
-        int[][][] postSolution = constructPostSolution(solution);
-        HttpPost post = new HttpPost("https://sudoku.yazarokur.com/");
-        setPostParams(post, puzzleHtml, postSolution);
-        System.out.println("Thread waiting for puzzle id:" + puzzleIdInteger);
-        Thread.sleep(65000L);
-        String postResponse = null;
-        synchronized (lock) {
-            httpResponse = client.execute(post);
-            postResponse = EntityUtils.toString(httpResponse.getEntity());
-            httpResponse.getEntity().consumeContent();
-        }
-        if (postResponse.contains("Tebrik Ederim.") && postResponse.contains("Başarını Paylaş Herkes Duysun")) {
-            System.out.println("Solved:" + puzzleIdInteger);
-        } else {
-            System.out.println("Something went wrong with this:" + puzzleIdInteger);
-        }
+
     }
 
     private static void setPostParams(HttpPost post, String puzzleHtml, int[][][] postSolution) throws UnsupportedEncodingException {
