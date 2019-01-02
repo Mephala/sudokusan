@@ -44,7 +44,7 @@ public class SudokuGUI extends JPanel implements ActionListener {
         frame = new JFrame("Sudoku Solver");
         try {
             URL url = SudokuGUI.class.getResource("/masro.JPG");
-            frame.setIconImage(Toolkit.getDefaultToolkit().getImage(url));
+            frame.setIconImage(Toolkit.getDefaultToolkit().getImage(url)); // adding masraf!
         } catch (Throwable t) {
             t.printStackTrace();
         }
