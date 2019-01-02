@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class YazarokurAutoSolver {
 
     private static final Object lock = new Object();
-    private static final int SOLVER_THREADS = 35;
+    private static final int SOLVER_THREADS = 18;
     private static final int PUZZLE_ID_LIMIT = 1000000;
     private static final AtomicInteger runningThreads = new AtomicInteger(SOLVER_THREADS);
     private static final AtomicInteger waitingThreads = new AtomicInteger(0);
@@ -83,7 +83,7 @@ public class YazarokurAutoSolver {
                 runningThreads.decrementAndGet();
                 waitingThreads.incrementAndGet();
                 System.out.println("Thread waiting for puzzle id:" + puzzleIdInteger + ", runningThreads:" + runningThreads.get() + " , waitingThreads:" + waitingThreads.get());
-                Thread.sleep(145000L);
+                Thread.sleep(120000L);
                 runningThreads.incrementAndGet();
                 waitingThreads.decrementAndGet();
                 String postResponse = null;
