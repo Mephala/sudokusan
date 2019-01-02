@@ -71,11 +71,12 @@ public class SudokuGUI extends JPanel implements ActionListener {
 
         // Text fields representing each sudoko square
         squares = new JTextField[SIZE][SIZE];
-
+        Font font = new Font("SansSerif", Font.BOLD, 20);
         // Initially set all text fields to 0 (empty)
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
                 squares[r][c] = new JTextField("0");
+                squares[r][c].setFont(font);
                 squares[r][c].setHorizontalAlignment((int) CENTER_ALIGNMENT);
                 squares[r][c].setEditable(false);
                 gridPanel.add(squares[r][c]);
