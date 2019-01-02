@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class YazarokurAutoSolver {
 
     private static final Object lock = new Object();
-    private static final int SOLVER_THREADS = 26;
+    private static final int SOLVER_THREADS = 24;
     private static final int PUZZLE_ID_LIMIT = 1000000;
     private static final AtomicInteger runningThreads = new AtomicInteger(SOLVER_THREADS);
     private static final AtomicInteger waitingThreads = new AtomicInteger(0);
