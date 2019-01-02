@@ -8,6 +8,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.util.Scanner;
 
 /**
@@ -41,6 +42,12 @@ public class SudokuGUI extends JPanel implements ActionListener {
      */
     private static void createAndShowUI() {
         frame = new JFrame("Sudoku Solver");
+        try {
+            URL url = SudokuGUI.class.getResource("/masro.JPG");
+            frame.setIconImage(Toolkit.getDefaultToolkit().getImage(url));
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
         frame.add(new SudokuGUI(), BorderLayout.CENTER);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JFrame.setDefaultLookAndFeelDecorated(true);
