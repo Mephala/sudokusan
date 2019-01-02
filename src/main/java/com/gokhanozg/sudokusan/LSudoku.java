@@ -10,6 +10,7 @@ import java.util.*;
 public class LSudoku {
 
     private Integer[][] vals;
+    private boolean solved = false;
 
     public LSudoku(Integer i1, Integer i2, Integer i3, Integer i4, Integer i5, Integer i6, Integer i7, Integer i8, Integer i9) {
         vals = new Integer[3][3];
@@ -87,5 +88,29 @@ public class LSudoku {
             retval.add(lSudoku);
         }
         return retval;
+    }
+
+    public boolean isSolved() {
+        return solved;
+    }
+
+    public void setSolved(boolean solved) {
+        this.solved = solved;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                sb.append(vals[i][j] == null ? "-" : vals[i][j]);
+                if (j != 2) {
+                    sb.append(",");
+                } else {
+                    sb.append("/");
+                }
+            }
+        }
+        return sb.toString();
     }
 }
