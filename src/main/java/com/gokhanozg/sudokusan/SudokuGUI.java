@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.*;
 import java.util.Scanner;
 
@@ -22,7 +24,7 @@ public class SudokuGUI extends JPanel implements ActionListener {
     private JButton buttonOpen;
     private JButton buttonSave;
     private JButton buttonLock;
-    private JButton buttonVerify;
+    private JButton buttonReset;
 
     /**
      * Specify this layout as a border layout, set the window size, and call the init routine.
@@ -87,19 +89,19 @@ public class SudokuGUI extends JPanel implements ActionListener {
         buttonOpen = new JButton("Open");
         buttonSave = new JButton("Save");
         buttonSolve = new JButton("Solve");
-        buttonVerify = new JButton("Verify");
+        buttonReset = new JButton("Reset");
         buttonLock = new JButton("Unlock");
 
         buttonOpen.addActionListener(this);
         buttonSave.addActionListener(this);
         buttonSolve.addActionListener(this);
-        buttonVerify.addActionListener(this);
+        buttonReset.addActionListener(this);
         buttonLock.addActionListener(this);
 
         menuPanel.add(buttonOpen);
         menuPanel.add(buttonSave);
         menuPanel.add(buttonSolve);
-        menuPanel.add(buttonVerify);
+        menuPanel.add(buttonReset);
         menuPanel.add(buttonLock);
 
         // Add the two panels to this
@@ -137,12 +139,45 @@ public class SudokuGUI extends JPanel implements ActionListener {
 
         // Solve button
         if (source == buttonSolve) {
-            solve();
+            SwingWorker<Void, Void> mySwingWorker = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+
+                    solve();
+                    return null;
+                }
+            };
+
+            Window win = SwingUtilities.getWindowAncestor((AbstractButton) actionEvent.getSource());
+            final JDialog dialog = new JDialog(win, "Dialog", Dialog.ModalityType.APPLICATION_MODAL);
+            dialog.setUndecorated(true);
+            mySwingWorker.addPropertyChangeListener(new PropertyChangeListener() {
+
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    if (evt.getPropertyName().equals("state")) {
+                        if (evt.getNewValue() == SwingWorker.StateValue.DONE) {
+                            dialog.dispose();
+                        }
+                    }
+                }
+            });
+            mySwingWorker.execute();
+
+            JProgressBar progressBar = new JProgressBar();
+            progressBar.setIndeterminate(true);
+            JPanel panel = new JPanel(new BorderLayout());
+            panel.add(progressBar, BorderLayout.CENTER);
+            panel.add(new JLabel("Please wait......."), BorderLayout.PAGE_START);
+            dialog.add(panel);
+            dialog.pack();
+            dialog.setLocationRelativeTo(win);
+            dialog.setVisible(true);
         }
 
         // Verify button
-        if (source == buttonVerify) {
-            verify();
+        if (source == buttonReset) {
+            reset();
         }
 
         // Lock/Unlock button
@@ -252,22 +287,33 @@ public class SudokuGUI extends JPanel implements ActionListener {
      * Calls the solve method of the Sudoku class.
      */
     private void solve() {
-        int[][] sudoku = getSudokuFromSquares();
 
-//    if (Sudoku.fillSudoku(sudoku)) {
-//      update(sudoku);
-//      JOptionPane.showMessageDialog(this, "Solution found.");
-//    } else {
-//      JOptionPane.showMessageDialog(this, "Solution NOT found.");
-//    }
+
+        int[][] sudoku = getSudokuFromSquares();
+        int[][] solution = SudokuSolver.solveFromGrid(sudoku);
+        if (solution != null) {
+            update(solution);
+            JOptionPane.showMessageDialog(this, "Solution found.");
+        } else {
+            JDialog dialog = new JOptionPane("Given Sudoku Puzzle has NO Solution. Can't find it if it doesn't exist.", JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION).createDialog("Error");
+            dialog.setAlwaysOnTop(true);
+            dialog.setVisible(true);
+            dialog.dispose();
+//            JOptionPane.showMessageDialog(this, "Solution NOT found.");
+        }
     }
 
     /**
      * Calls the checkSudoku method of the Sudoku class.
      */
-    private void verify() {
-        int[][] sudoku = getSudokuFromSquares();
-
+    private void reset() {
+        int[][] sudoku = new int[9][9];
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                sudoku[i][j] = 0;
+            }
+        }
+        update(sudoku);
 //    if (Sudoku.checkSudoku(sudoku, true)) {
 //      JOptionPane.showMessageDialog(this, "Sudoku rules do hold.");
 //    } else {

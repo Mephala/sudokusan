@@ -14,6 +14,7 @@ public class SudokuSolver {
 
     public static void main(String[] args) {
 
+
         try {
             long start = System.nanoTime();
             String sudokuString = "-,-,-,-,-,-,-,-,1,-,-,-,-,-,3,-,2,-,-,-,-,-,8,5,-,-,-,-,-,-,-,-,4,-,9,-,5,-,7,-,-,-,-,-,-,-,-,-,1,-,-,-,-,-,5,-,-,-,-,2,-,-,-,-,-,-,-,1,-,-,4,-,-,7,3,-,-,-,-,-,9";
@@ -22,40 +23,12 @@ public class SudokuSolver {
             if (parse.length != 81) {
                 throw new IllegalArgumentException("Wrong string, please check (size:" + parse.length + ")");
             }
-            int index = 0;
             Integer[] initVals = new Integer[81];
             for (int i = 0; i < 81; i++) {
                 String s = parse[i];
                 initVals[i] = s.equals("-") ? null : Integer.parseInt(s);
             }
-            LSudoku lSudoku1 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
-            LSudoku lSudoku2 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
-            LSudoku lSudoku3 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
-            LSudoku lSudoku4 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
-            LSudoku lSudoku5 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
-            LSudoku lSudoku6 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
-            LSudoku lSudoku7 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
-            LSudoku lSudoku8 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
-            LSudoku lSudoku9 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
-//            LSudoku lSudoku1 = new LSudoku(null, null, null, 3, null, null, null, null, 9);
-//            LSudoku lSudoku2 = new LSudoku(null, 4, null, null, null, 5, null, null, 1);
-//            LSudoku lSudoku3 = new LSudoku(null, null, 5, null, 7, null, 6, 3, null);
-//            LSudoku lSudoku4 = new LSudoku(null, null, 2, 4, null, null, null, null, 3);
-//            LSudoku lSudoku5 = new LSudoku(null, 5, null, null, 6, null, null, 1, null);
-//            LSudoku lSudoku6 = new LSudoku(7, null, null, null, null, 1, 5, null, null);
-//            LSudoku lSudoku7 = new LSudoku(null, 6, 4, null, 9, null, 2, null, null);
-//            LSudoku lSudoku8 = new LSudoku(5, null, null, 2, null, null, null, 9, null);
-//            LSudoku lSudoku9 = new LSudoku(2, null, null, null, null, 4, null, null, null);
-//            LSudoku lSudoku1 = new LSudoku(6, 5, 3, 8, null, 7, null, null, null);
-//            LSudoku lSudoku2 = new LSudoku(4, null, null, 2, null, null, null, null, 5);
-//            LSudoku lSudoku3 = new LSudoku(7, null, null, null, null, null, 4, null, null);
-//            LSudoku lSudoku4 = new LSudoku(1, null, 4, 7, null, null, null, null, null);
-//            LSudoku lSudoku5 = new LSudoku(null, null, 6, null, 2, null, 3, null, null);
-//            LSudoku lSudoku6 = new LSudoku(null, null, null, null, null, 5, 1, null, 9);
-//            LSudoku lSudoku7 = new LSudoku(null, null, 2, null, null, null, null, null, 1);
-//            LSudoku lSudoku8 = new LSudoku(6, null, null, null, null, 1, null, null, null);
-//            LSudoku lSudoku9 = new LSudoku(null, null, null, 3, null, 6, 9, 8, 4);
-            solveSudoku(lSudoku1, lSudoku2, lSudoku3, lSudoku4, lSudoku5, lSudoku6, lSudoku7, lSudoku8, lSudoku9);
+            solveFrom1DIntegerArray(initVals);
             long differ = System.nanoTime() - start;
             double seconds = differ / 1000000000d;
             System.out.println("Solved puzzle in " + BigDecimal.valueOf(seconds).setScale(3, BigDecimal.ROUND_HALF_UP).toPlainString() + " seconds.");
@@ -64,9 +37,41 @@ public class SudokuSolver {
         }
     }
 
-    public static int[][] solveFromGrid(int[][] given) {
-        return null;
+    private static int[][] solveFrom1DIntegerArray(Integer[] initVals) throws InterruptedException {
+        int index = 0;
+        LSudoku lSudoku1 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+        LSudoku lSudoku2 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+        LSudoku lSudoku3 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+        LSudoku lSudoku4 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+        LSudoku lSudoku5 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+        LSudoku lSudoku6 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+        LSudoku lSudoku7 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+        LSudoku lSudoku8 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+        LSudoku lSudoku9 = new LSudoku(initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++], initVals[index++]);
+        return solveSudoku(lSudoku1, lSudoku2, lSudoku3, lSudoku4, lSudoku5, lSudoku6, lSudoku7, lSudoku8, lSudoku9);
+    }
 
+    public static int[][] solveFromGrid(int[][] given) {
+        try {
+            Integer[] vals = new Integer[81];
+            for (int i = 0; i < 9; i++) {
+                for (int j = 0; j < 9; j++) {
+                    int p = fetchPFromij(i, j);
+                    int givenv = given[i][j];
+                    vals[p] = givenv == 0 ? null : givenv;
+                }
+            }
+            return solveFrom1DIntegerArray(vals);
+        } catch (Throwable t) {
+            t.printStackTrace();
+            return null;
+        }
+    }
+
+    private static int fetchPFromij(int i, int j) {
+        int block = ((i / 3) * 3) + j / 3;
+        int add = (i % 3 * 3) + (j % 3);
+        return (block * 9) + add;
     }
 
     private static int[][] solveSudoku(LSudoku lSudoku1, LSudoku lSudoku2, LSudoku lSudoku3, LSudoku lSudoku4, LSudoku lSudoku5, LSudoku lSudoku6, LSudoku lSudoku7, LSudoku lSudoku8, LSudoku lSudoku9) throws InterruptedException {
