@@ -39,7 +39,7 @@ public class SudokuGUI extends JPanel implements ActionListener {
      * Bootstrap the program.
      */
     private static void createAndShowUI() {
-        frame = new JFrame("Recursive Sudoku Solver");
+        frame = new JFrame("Sudoku Solver");
         frame.add(new SudokuGUI(), BorderLayout.CENTER);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JFrame.setDefaultLookAndFeelDecorated(true);
@@ -288,19 +288,27 @@ public class SudokuGUI extends JPanel implements ActionListener {
      */
     private void solve() {
 
-
-        int[][] sudoku = getSudokuFromSquares();
-        int[][] solution = SudokuSolver.solveFromGrid(sudoku);
-        if (solution != null) {
-            update(solution);
-            JOptionPane.showMessageDialog(this, "Solution found.");
-        } else {
-            JDialog dialog = new JOptionPane("Given Sudoku Puzzle has NO Solution. Can't find it if it doesn't exist.", JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION).createDialog("Error");
+        try {
+            int[][] sudoku = getSudokuFromSquares();
+            int[][] solution = SudokuSolver.solveFromGrid(sudoku);
+            if (solution != null) {
+                update(solution);
+                JOptionPane.showMessageDialog(this, "Solution found.");
+            } else {
+                JDialog dialog = new JOptionPane("Given Sudoku Puzzle has NO Solution. Can't find it if it doesn't exist.", JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION).createDialog("Error");
+                dialog.setAlwaysOnTop(true);
+                dialog.setVisible(true);
+                dialog.dispose();
+//            JOptionPane.showMessageDialog(this, "Solution NOT found.");
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+            JDialog dialog = new JOptionPane("Invalid inputs. Please check cells.", JOptionPane.ERROR_MESSAGE, JOptionPane.DEFAULT_OPTION).createDialog("Error");
             dialog.setAlwaysOnTop(true);
             dialog.setVisible(true);
             dialog.dispose();
-//            JOptionPane.showMessageDialog(this, "Solution NOT found.");
         }
+
     }
 
     /**
@@ -426,7 +434,7 @@ public class SudokuGUI extends JPanel implements ActionListener {
         int[][] sudoku = new int[SIZE][SIZE];
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
-                sudoku[r][c] = Integer.parseInt(squares[r][c].getText());
+                sudoku[r][c] = Integer.parseInt(squares[r][c].getText().trim());
             }
         }
         return sudoku;
