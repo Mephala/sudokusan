@@ -17,6 +17,7 @@ public class SudokuSolver {
         try {
             long start = System.nanoTime();
             String sudokuString = "-,-,-,-,-,-,-,-,1,-,-,-,-,-,3,-,2,-,-,-,-,-,8,5,-,-,-,-,-,-,-,-,4,-,9,-,5,-,7,-,-,-,-,-,-,-,-,-,1,-,-,-,-,-,5,-,-,-,-,2,-,-,-,-,-,-,-,1,-,-,4,-,-,7,3,-,-,-,-,-,9";
+//            String antiBruteForceString = "-,-,-,-,-,-,-,-,1,-,-,-,-,-,3,-,2,-,-,-,-,-,8,5,-,-,-,-,-,-,-,-,4,-,9,-,5,-,7,-,-,-,-,-,-,-,-,-,1,-,-,-,-,-,5,-,-,-,-,2,-,-,-,-,-,-,-,1,-,-,4,-,-,7,3,-,-,-,-,-,9";
             String[] parse = sudokuString.split(",");
             if (parse.length != 81) {
                 throw new IllegalArgumentException("Wrong string, please check (size:" + parse.length + ")");
