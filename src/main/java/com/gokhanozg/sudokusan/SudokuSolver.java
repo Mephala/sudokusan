@@ -1,5 +1,7 @@
 package com.gokhanozg.sudokusan;
 
+import de.sfuhrm.sudoku.*;
+
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -11,6 +13,7 @@ public class SudokuSolver {
     private static final int BRUTE_FORCE_LIMIT = 100000;
     public static final String ANSI_RED = "\u001B[31m";
     public static final String ANSI_RESET = "\u001B[0m";
+    private static final boolean USE_SFHURM = true;
 
     public static void main(String[] args) {
 
@@ -74,25 +77,59 @@ public class SudokuSolver {
         return (block * 9) + add;
     }
 
+    public static int[][] convertBytes(byte[][] bytes) {
+        int[][] retval = new int[9][9];
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                retval[i][j] = bytes[i][j];
+            }
+        }
+        return retval;
+    }
+
     private static int[][] solveSudoku(LSudoku lSudoku1, LSudoku lSudoku2, LSudoku lSudoku3, LSudoku lSudoku4, LSudoku lSudoku5, LSudoku lSudoku6, LSudoku lSudoku7, LSudoku lSudoku8, LSudoku lSudoku9) throws InterruptedException {
         GSudoku gSudoku = new GSudoku(lSudoku1, lSudoku2, lSudoku3, lSudoku4, lSudoku5, lSudoku6, lSudoku7, lSudoku8, lSudoku9);
-        System.out.println("***** SOLVING THIS SUDOKU *****");
-        gSudoku.print();
+        if (USE_SFHURM) {
+            Integer[][] gsudokuVals = gSudoku.getVals();
+            List<String> rows = new ArrayList<>();
+            for (int i = 0; i < 9; i++) {
+                StringBuilder sb = new StringBuilder();
+                for (int j = 0; j < 9; j++) {
+                    Integer value = gsudokuVals[i][j] == null ? 0 : gsudokuVals[i][j];
+                    sb.append(value);
+                }
+                rows.add(sb.toString());
+            }
+            Riddle riddle = new GameMatrixFactory().newRiddle();
+            riddle.setAll(QuadraticArrays.parse(rows.get(0), rows.get(1), rows.get(2), rows.get(3), rows.get(4), rows.get(5), rows.get(6), rows.get(7), rows.get(8)));
+            Solver solver = new Solver(riddle);
+            List<GameMatrix> solutions = solver.solve();
+            if (solutions == null || solutions.size() == 0) {
+                return null;
+            } else {
+                byte[][] bytes = solutions.get(0).getArray();
+                return convertBytes(bytes);
+            }
+        } else {
+            System.out.println("***** SOLVING THIS SUDOKU *****");
+            gSudoku.print();
 
-        Map<Integer, PossibleLSudokuSolutions> positionalSudokuSolutions = new HashMap<>();
-        List<LSudoku> lSudokuList = new ArrayList<>();
-        lSudokuList.add(lSudoku1);
-        lSudokuList.add(lSudoku2);
-        lSudokuList.add(lSudoku3);
-        lSudokuList.add(lSudoku4);
-        lSudokuList.add(lSudoku5);
-        lSudokuList.add(lSudoku6);
-        lSudokuList.add(lSudoku7);
-        lSudokuList.add(lSudoku8);
-        lSudokuList.add(lSudoku9);
+            Map<Integer, PossibleLSudokuSolutions> positionalSudokuSolutions = new HashMap<>();
+            List<LSudoku> lSudokuList = new ArrayList<>();
+            lSudokuList.add(lSudoku1);
+            lSudokuList.add(lSudoku2);
+            lSudokuList.add(lSudoku3);
+            lSudokuList.add(lSudoku4);
+            lSudokuList.add(lSudoku5);
+            lSudokuList.add(lSudoku6);
+            lSudokuList.add(lSudoku7);
+            lSudokuList.add(lSudoku8);
+            lSudokuList.add(lSudoku9);
 
-        computePossibleSolutions(gSudoku, positionalSudokuSolutions, lSudokuList);
-        return solveWithInitialPossibilities(positionalSudokuSolutions, lSudokuList, gSudoku);
+            computePossibleSolutions(gSudoku, positionalSudokuSolutions, lSudokuList);
+            return solveWithInitialPossibilities(positionalSudokuSolutions, lSudokuList, gSudoku);
+        }
+
     }
 
     private static void computePossibleSolutions(GSudoku gSudoku, Map<Integer, PossibleLSudokuSolutions> positionalSudokuSolutions, List<LSudoku> lSudokuList) throws InterruptedException {
