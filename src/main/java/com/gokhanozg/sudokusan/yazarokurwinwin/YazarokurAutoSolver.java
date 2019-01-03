@@ -22,10 +22,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class YazarokurAutoSolver {
 
     private static final Object lock = new Object();
-    private static final int SOLVER_THREADS = 200;
+    private static final int SOLVER_THREADS = 180;
     private static final int PUZZLE_ID_LIMIT = 1000000;
     private static final AtomicInteger runningThreads = new AtomicInteger(SOLVER_THREADS);
     private static final AtomicInteger waitingThreads = new AtomicInteger(0);
+    private static final int START_SUDOKU_ID = 322361;
 
     public static void main(String[] args) {
         try {
@@ -47,7 +48,7 @@ public class YazarokurAutoSolver {
     }
 
     private static void startSolving(HttpClient client) throws InterruptedException {
-        AtomicInteger puzzleId = new AtomicInteger(223456);
+        AtomicInteger puzzleId = new AtomicInteger(START_SUDOKU_ID);
         List<Thread> solverThreads = new ArrayList<>();
         for (int i = 0; i < SOLVER_THREADS; i++) {
             Thread t = new Thread(() -> solvePuzzle(client, puzzleId));
