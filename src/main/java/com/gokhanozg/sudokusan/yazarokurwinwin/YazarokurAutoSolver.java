@@ -26,20 +26,23 @@ public class YazarokurAutoSolver {
     private static final int PUZZLE_ID_LIMIT = 1000000;
     private static final AtomicInteger runningThreads = new AtomicInteger(SOLVER_THREADS);
     private static final AtomicInteger waitingThreads = new AtomicInteger(0);
-    private static final int START_SUDOKU_ID = 322361;
+    private static final int START_SUDOKU_ID = 1;
+    private static final String email = "rottenstumpy@mailinator.com";
+    private static final String pw = "bbbbbbbbb";
+    private static final String username = "ceyda";
 
     public static void main(String[] args) {
         try {
             HttpClient client = new DefaultHttpClient();
             HttpPost post = new HttpPost("http://uye.yazarokur.com/giris");
             List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair("password", "bbbbbbbbb"));
-            params.add(new BasicNameValuePair("email", "mephalay@gmail.com"));
+            params.add(new BasicNameValuePair("password", pw));
+            params.add(new BasicNameValuePair("email", email));
             params.add(new BasicNameValuePair("_d", "signin"));
             post.setEntity(new UrlEncodedFormEntity(params));
             HttpResponse response = client.execute(post);
             String responseString = EntityUtils.toString(response.getEntity());
-            if (responseString.contains("iripenis")) {
+            if (responseString.contains(username)) {
                 startSolving(client);
             }
         } catch (Throwable t) {
